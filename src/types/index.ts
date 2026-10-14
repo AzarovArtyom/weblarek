@@ -21,18 +21,13 @@ export interface IProduct {
 export type TPayment = "card" | "cash";
 
 export interface IBuyer {
-  payment: TPayment;
+  payment: TPayment | null;
   email: string;
   phone: string;
   address: string;
 }
 
-export interface IBuyerErrors {
-  payment?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-}
+export type IBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 export interface IProductsResponse {
   total: number;
@@ -40,6 +35,7 @@ export interface IProductsResponse {
 }
 
 export interface IOrder extends IBuyer {
+  payment: TPayment;
   total: number;
   items: string[];
 }

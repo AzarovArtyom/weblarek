@@ -121,41 +121,81 @@ category: string;
 price: number | null;
 }
 
+### TPayment — способ оплаты
+
+Тип определяет допустимые способы оплаты:
+'card' — банковской картой;
+'cash' — наличными.
+
 ### IBuyer - покупатель
 
-Интерфейс описывает данные покупателя,
-необходимые для оформления заказа.
-
-type TPayment = 'card' | 'cash';
+Интерфейс описывает данные покупателя
 
 interface IBuyer {
-payment: TPayment;
+payment: TPayment | null;
 email: string;
 phone: string;
 address: string;
 }
 
-TPayment определяет доступные способы оплаты: картой и наличными
+payment: TPayment | null - способ оплаты
+email: string - электронная почта
+phone: string - номер телефона
+address: string - адрес доставки
 
 ### IBuyerErrors - ошибки валидации
 
-Интерфейс описывает ошибки проверки данных покупателя
-Если поле заполнено корректно, соответствующее
-свойство в объекте ошибок отсутствует
+Тип описывает сообщения об ошибках для полей покупателя.
 
-interface IBuyerErrors {
-payment?: string;
-email?: string;
-phone?: string;
-address?: string;
+type IBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+
+Использует ключи IBuyer. Каждое поле необязательно и содержит строку с текстом ошибки
+
+### IProductsResponse - ответ сервера с каталогом
+
+Интерфейс описывает данные, получаемые от сервера при запросе каталога товаров
+
+interface IProductsResponse {
+total: number;
+items: IProduct[];
 }
 
-Приложение использует два основных интерфейса:
+Поля:
+total: number - общее количество товаров
+items: IProduct[] - массив товаров, каждый из которых соответствует интерфейсу IProduct
 
-IProduct - товар магазина
-IBuyer - данные покупателя
+### IOrder — данные заказа
 
-TPayment - тип способа оплаты: карта или наличные
+Интерфейс описывает объект, который отправляется на сервер при оформлении заказа
+
+interface IOrder extends IBuyer {
+payment: TPayment;
+total: number;
+items: string[];
+}
+
+Наследует поля интерфейса IBuyer:
+payment: TPayment — способ оплаты
+email: string — электронная почта покупателя
+phone: string — телефон покупателя
+address: string — адрес доставки
+
+Дополнительные поля:
+total: number — общая стоимость заказа
+items: string[] — массив идентификаторов заказанных товаров
+
+### IOrderResponse - ответ сервера на заказ
+
+Интерфейс описывает ответ сервера после успешного оформления заказа
+
+interface IOrderResponse {
+id: string;
+total: number;
+}
+
+Поля:
+id: string - идентификатор оформленного заказа
+total: number - итоговая сумма заказа, подтверждённая сервером
 
 ## Модели данных
 
@@ -185,13 +225,13 @@ getSelectedItem(): IProduct | null - получить выбранный тов�
 конструктор не принимает параметров
 
 Поле:
-data: Partial<IBuyer> - данные покупателя
+data: IBuyer - полный объект данных покупателя
 
 Методы:
-setData(data: Partial<IBuyer>): void - обновить переданные поля и сохранить остальные
-getData(): Partial<IBuyer> - получить текущие данные покупателя
-clear(): void - очистить данные
-validate(): IBuyerErrors - проверить заполнение полей и найти ошибки
+setData(data: Partial<IBuyer>): void - обновить переданные поля, сохранив остальные
+getData(): IBuyer - получить полный объект данных покупателя
+clear(): void - восстановить начальные значения всех поле
+validate(): IBuyerErrors - проверить заполнение полей и вернуть ошибки
 
 ### Basket - корзина товаров
 
